@@ -9,7 +9,8 @@ import cozeloop
 import uvicorn
 import time
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import StreamingResponse, JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import StateGraph, END
 from langgraph.graph.state import CompiledStateGraph
@@ -235,6 +236,15 @@ class GraphService:
 
 service = GraphService()
 app = FastAPI()
+
+# 挂载静态文件服务
+app.mount("/static", StaticFiles(directory="assets"), name="static")
+
+# 首页路由
+@app.get("/")
+async def read_root():
+    """返回主页"""
+    return FileResponse("assets/index.html")
 
 # OpenAI 兼容接口处理器
 openai_handler = OpenAIChatHandler(service)
