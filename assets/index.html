@@ -169,6 +169,17 @@
             height: 24px;
         }
 
+        .voice-btn.disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .voice-btn.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
         .send-btn {
             width: 50px;
             height: 50px;
@@ -295,6 +306,11 @@
         <div class="header">
             <h1>🎤 公务员培训助手</h1>
             <p>点击语音按钮开始说话，或直接输入文字</p>
+            <div style="margin-top: 10px;">
+                <button onclick="window.location.href='/static/test-browser.html'" style="padding: 8px 16px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; cursor: pointer; font-size: 14px;">
+                    🔍 浏览器兼容性测试
+                </button>
+            </div>
         </div>
 
         <div class="chat-container" id="chatContainer">
@@ -306,6 +322,11 @@
 💬 直接提问：说出您想了解的公务员相关话题
 
 开始使用吧！</div>
+            </div>
+            <div id="browserHint" style="display: none; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px; margin-bottom: 20px;">
+                <strong>💡 提示：</strong>您的浏览器可能不支持语音识别功能。<br>
+                推荐使用 <strong>Chrome</strong> 或 <strong>Edge</strong> 浏览器以获得最佳体验。<br>
+                当然，您也可以直接使用文字输入功能。
             </div>
         </div>
 
@@ -345,8 +366,32 @@
         let messageHistory = [];
 
         // 检查浏览器是否支持语音识别
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let supportsSpeechRecognition = false;
+        let speechRecognitionApi = null;
+
+        if ('webkitSpeechRecognition' in window) {
+            supportsSpeechRecognition = true;
+            speechRecognitionApi = window.webkitSpeechRecognition;
+            console.log('使用 webkitSpeechRecognition');
+        } else if ('SpeechRecognition' in window) {
+            supportsSpeechRecognition = true;
+            speechRecognitionApi = window.SpeechRecognition;
+            console.log('使用 SpeechRecognition');
+        } else {
+            console.warn('浏览器不支持语音识别 API');
+            // 检测浏览器类型
+            const userAgent = navigator.userAgent.toLowerCase();
+            if (userAgent.includes('firefox')) {
+                console.warn('Firefox 浏览器不支持 Web Speech API');
+            } else if (userAgent.includes('msie') || userAgent.includes('trident')) {
+                console.warn('IE 浏览器不支持 Web Speech API');
+            } else {
+                console.warn('当前浏览器不支持 Web Speech API');
+            }
+        }
+
+        if (supportsSpeechRecognition) {
+            const SpeechRecognition = speechRecognitionApi;
             recognition = new SpeechRecognition();
             recognition.continuous = false;
             recognition.interimResults = true;
@@ -396,8 +441,13 @@
                 }
             };
         } else {
-            voiceBtn.style.display = 'none';
-            status.textContent = '⚠️ 您的浏览器不支持语音识别';
+            // 浏览器不支持语音识别，但保留按钮显示为禁用状态
+            voiceBtn.classList.add('disabled');
+            voiceBtn.disabled = true;
+            voiceBtn.onclick = function() {
+                alert('您的浏览器不支持语音识别功能。\n\n推荐使用以下浏览器：\n• Chrome\n• Edge\n• Safari\n• Opera\n\n您可以直接在输入框中输入文字。');
+            };
+            status.textContent = '⚠️ 您的浏览器不支持语音识别，请使用 Chrome 或 Edge 浏览器';
         }
 
         function toggleVoice() {
@@ -554,6 +604,18 @@
         // 页面加载时聚焦输入框
         window.onload = function() {
             inputBox.focus();
+
+            // 检查浏览器兼容性并显示提示
+            if (!supportsSpeechRecognition) {
+                const hint = document.getElementById('browserHint');
+                if (hint) {
+                    hint.style.display = 'block';
+                }
+                // 添加到控制台
+                console.log('语音识别功能不可用，请使用 Chrome 或 Edge 浏览器');
+            } else {
+                console.log('✅ 语音识别功能可用');
+            }
         };
     </script>
 </body>
