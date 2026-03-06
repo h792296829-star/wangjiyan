@@ -12,6 +12,24 @@
 
 ## 🚀 快速开始
 
+### 步骤 1：推送代码到 GitHub
+
+首先需要将代码推送到 GitHub 仓库。
+
+[📖 查看 GitHub 推送指南](docs/GITHUB_PUSH_GUIDE.md)
+
+**简要步骤：**
+
+1. 创建 GitHub Personal Access Token
+2. 更新远程仓库 URL：
+   ```bash
+   git remote set-url origin https://YOUR_TOKEN@github.com/h792296829-star/agent.git
+   ```
+3. 推送代码：
+   ```bash
+   git push origin main
+   ```
+
 ### 方式一：Vercel 部署（推荐，2分钟）
 
 [📖 查看 Vercel 部署指南](docs/VERCEL_DEPLOY.md)
