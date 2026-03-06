@@ -12,9 +12,8 @@ os.environ['COZE_WORKSPACE_PATH'] = project_root
 
 # 导入 ASGI 应用
 from starlette.applications import Starlette
-from starlette.responses import JSONResponse, Response
-from starlette.routing import Route, Mount
-from starlette.staticfiles import StaticFiles
+from starlette.responses import JSONResponse
+from starlette.routing import Route
 from starlette.requests import Request
 
 async def homepage(request: Request):
@@ -23,9 +22,11 @@ async def homepage(request: Request):
         html_path = os.path.join(project_root, 'assets', 'index.html')
         with open(html_path, 'r', encoding='utf-8') as f:
             content = f.read()
-        return Response(content, media_type='text/html; charset=utf-8')
+        return JSONResponse({'content': content, 'status': 'success'})
     except FileNotFoundError:
         return JSONResponse({'error': 'Homepage not found'}, status_code=404)
+    except Exception as e:
+        return JSONResponse({'error': str(e)}, status_code=500)
 
 async def stream_run(request: Request):
     """处理流式运行请求"""
@@ -80,7 +81,7 @@ async def stream_run(request: Request):
         error_detail = traceback.format_exc()
         return JSONResponse({
             'error': str(e),
-            'detail': error_detail,
+            'detail': error_detail[:500],  # 限制错误信息长度
             'status': 'error'
         }, status_code=500)
 
@@ -90,9 +91,12 @@ app = Starlette(
     routes=[
         Route('/', homepage),
         Route('/stream_run', stream_run, methods=['POST']),
-        Mount('/static', StaticFiles(directory=os.path.join(project_root, 'assets')), name='static'),
     ]
 )
 
-# Vercel ASGI handler
-asgi_handler = app
+# Vercel handler
+def handler(event, context):
+    """Vercel Serverless handler"""
+    from mangum import Mangum
+    asgi_handler = Mangum(app)
+    return asgi_handler(event, context)
