@@ -1,5 +1,9 @@
-# Vercel Serverless Function - Simple Version
+"""
+Vercel Serverless Function
+Simple and clean version
+"""
 import json
+
 
 def handler(event, context):
     """Simple handler for testing"""
