@@ -1,6 +1,6 @@
 """
 Vercel Serverless Function
-Simple and clean version
+Minimal version with no external dependencies
 """
 import json
 
@@ -14,6 +14,7 @@ def handler(event, context):
         },
         "body": json.dumps({
             "message": "Hello from Vercel!",
-            "status": "success"
+            "status": "success",
+            "note": "This is a minimal test function"
         })
     }
