@@ -1,25 +1,27 @@
-# Vercel Serverless Function Entry Point (ASGI)
+# Vercel Serverless Function Entry Point
 import os
 import sys
-import json
-from typing import Dict, Any
 
 # 添加项目路径
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(current_dir)
+sys.path.insert(0, project_root)
 
+# 设置环境变量
+os.environ['COZE_WORKSPACE_PATH'] = project_root
+
+# 导入 ASGI 应用
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
 from starlette.requests import Request
 
-# 设置环境变量
-os.environ['COZE_WORKSPACE_PATH'] = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 async def homepage(request: Request):
     """返回主页"""
     try:
-        with open('assets/index.html', 'r', encoding='utf-8') as f:
+        html_path = os.path.join(project_root, 'assets', 'index.html')
+        with open(html_path, 'r', encoding='utf-8') as f:
             content = f.read()
         return Response(content, media_type='text/html; charset=utf-8')
     except FileNotFoundError:
@@ -32,7 +34,7 @@ async def stream_run(request: Request):
 
         # 导入并运行 Agent
         from src.agents.agent import build_agent
-        from langchain_core.messages import HumanMessage, AIMessage
+        from langchain_core.messages import HumanMessage
 
         # 构建 Agent
         agent = build_agent()
@@ -74,17 +76,23 @@ async def stream_run(request: Request):
         })
 
     except Exception as e:
+        import traceback
+        error_detail = traceback.format_exc()
         return JSONResponse({
             'error': str(e),
+            'detail': error_detail,
             'status': 'error'
         }, status_code=500)
 
 # 创建 Starlette 应用
 app = Starlette(
-    debug=True,
+    debug=False,
     routes=[
         Route('/', homepage),
         Route('/stream_run', stream_run, methods=['POST']),
-        Mount('/static', StaticFiles(directory='assets'), name='static'),
+        Mount('/static', StaticFiles(directory=os.path.join(project_root, 'assets')), name='static'),
     ]
 )
+
+# Vercel ASGI handler
+asgi_handler = app
