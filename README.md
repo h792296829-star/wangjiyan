@@ -12,27 +12,43 @@
 
 ## 🚀 快速开始
 
-### 步骤 1：推送代码到 GitHub
+### 方式一：Vercel 部署（推荐，5分钟）
 
-首先需要将代码推送到 GitHub 仓库。
+**步骤 1：推送代码到 GitHub**
 
-[📖 查看 GitHub 推送指南](docs/GITHUB_PUSH_GUIDE.md)
-
-**简要步骤：**
-
-1. 创建 GitHub Personal Access Token
-2. 更新远程仓库 URL：
+1. 创建 GitHub Token：https://github.com/settings/tokens/new
+2. 勾选 `repo`，点击 Generate token
+3. 复制 token
+4. 推送代码：
    ```bash
+   cd /workspace/projects
    git remote set-url origin https://YOUR_TOKEN@github.com/h792296829-star/agent.git
-   ```
-3. 推送代码：
-   ```bash
    git push origin main
    ```
 
-### 方式一：Vercel 部署（推荐，2分钟）
+**步骤 2：部署到 Vercel**
 
-[📖 查看 Vercel 部署指南](docs/VERCEL_DEPLOY.md)
+1. 打开：https://vercel.com/new
+2. 登录 GitHub 账号
+3. 导入仓库：`h792296829-star/agent`
+4. 点击 **Deploy**
+
+**步骤 3：配置环境变量**
+
+部署成功后，需要设置 DeepSeek 环境变量：
+
+1. 进入项目 → **Settings** → **Environment Variables**
+2. 添加第一个变量：
+   - **Name**: `COZE_WORKLOAD_IDENTITY_API_KEY`
+   - **Value**: `sk-39f88732243f41b5b9e30f9e7fcf25b6`
+   - **Environment**: 全选
+3. 添加第二个变量：
+   - **Name**: `COZE_INTEGRATION_MODEL_BASE_URL`
+   - **Value**: `https://api.deepseek.com`
+   - **Environment**: 全选
+4. **重新部署**：Deployments → 最新部署 → Redeploy
+
+[📖 详细配置指南](docs/DEEPSEEK_CONFIG.md)
 
 **优点：**
 - ✅ 免费使用
@@ -121,9 +137,9 @@ http://localhost:5000
 
 - **后端**：FastAPI, LangChain, LangGraph
 - **前端**：HTML, CSS, JavaScript
-- **AI 模型**：豆包 (doubao-seed-1-6-251015)
+- **AI 模型**：DeepSeek (deepseek-chat)
 - **语音识别**：Web Speech API
-- **部署**：Vercel, Supervisor, Nginx
+- **部署**：Vercel
 
 ## 📦 依赖安装
 
@@ -144,15 +160,15 @@ pip install -r requirements.txt
 ### 环境变量
 
 ```bash
+# DeepSeek API 配置
+COZE_WORKLOAD_IDENTITY_API_KEY=sk-39f88732243f41b5b9e30f9e7fcf25b6
+COZE_INTEGRATION_MODEL_BASE_URL=https://api.deepseek.com
+
 # 工作目录
-COZE_WORKSPACE_PATH=/path/to/project
-
-# API 密钥（自动获取）
-COZE_WORKLOAD_IDENTITY_API_KEY=your_api_key
-
-# API 基础 URL（自动获取）
-COZE_INTEGRATION_MODEL_BASE_URL=https://api.example.com
+COZE_WORKSPACE_PATH=/tmp
 ```
+
+[📖 详细配置指南](docs/DEEPSEEK_CONFIG.md)
 
 ### Agent 配置
 
@@ -177,10 +193,10 @@ COZE_INTEGRATION_MODEL_BASE_URL=https://api.example.com
 
 ## 📖 文档
 
+- [DeepSeek 配置指南](docs/DEEPSEEK_CONFIG.md) - 环境变量配置
+- [GitHub 推送指南](docs/GITHUB_PUSH_GUIDE.md) - 代码推送教程
 - [Vercel 部署指南](docs/VERCEL_DEPLOY.md) - 最简单的部署方式
 - [云部署指南](docs/DEPLOYMENT_README.md) - 完整的云服务器部署
-- [快速开始](docs/QUICK_START.md) - 5分钟上手
-- [详细部署](docs/DEPLOYMENT.md) - 深度配置
 
 ## 🆘 常见问题
 
@@ -188,11 +204,25 @@ COZE_INTEGRATION_MODEL_BASE_URL=https://api.example.com
 
 检查浏览器是否支持语音识别，推荐使用 Chrome 或 Edge。
 
-### 2. 部署到 Vercel 失败？
+### 2. 部署到 Vercel 后提示 API 错误？
 
-查看 [Vercel 部署指南](docs/VERCEL_DEPLOY.md) 的常见问题部分。
+**解决方案：**
+1. 检查环境变量是否正确设置
+2. 确保重新部署了项目（环境变量修改后需要重新部署）
+3. 查看 [DeepSeek 配置指南](docs/DEEPSEEK_CONFIG.md)
 
-### 3. 本地运行无法启动？
+### 3. 如何更换模型？
+
+修改 `config/agent_llm_config.json` 中的 `model` 字段：
+```json
+{
+  "config": {
+    "model": "deepseek-chat"  // 或其他模型
+  }
+}
+```
+
+### 4. 本地运行无法启动？
 
 确保已安装所有依赖：`pip install -r requirements.txt`
 
