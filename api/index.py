@@ -1,20 +1,14 @@
-"""
-Vercel Serverless Function
-Minimal version with no external dependencies
-"""
+from http.server import BaseHTTPRequestHandler
 import json
 
 
-def handler(event, context):
-    """Simple handler for testing"""
-    return {
-        "statusCode": 200,
-        "headers": {
-            "Content-Type": "application/json"
-        },
-        "body": json.dumps({
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        response = {
             "message": "Hello from Vercel!",
-            "status": "success",
-            "note": "This is a minimal test function"
-        })
-    }
+            "status": "success"
+        }
+        self.wfile.write(json.dumps(response).encode())
